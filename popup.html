@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X Unfollow Checker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1 class="title">
+          <span class="icon">🔍</span>
+          X Unfollow Checker
+        </h1>
+        <div class="version">v1.0.0</div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="scanner">Scanner</button>
+      <button class="tab-btn" data-tab="allowlist">Allowlist</button>
+      <button class="tab-btn" data-tab="history">History</button>
+      <button class="tab-btn" data-tab="settings">Settings</button>
+    </nav>
+
+    <!-- Scanner Tab -->
+    <div class="tab-content active" id="scanner-tab">
+      <div class="status-section">
+        <div class="status-card" id="status-card">
+          <div class="status-icon">⏸️</div>
+          <div class="status-text">Ready to scan</div>
+          <div class="status-details" id="status-details">
+            Click "Start Scan" to analyze your following list
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-section">
+        <button class="btn btn-primary" id="start-scan-btn">
+          <span class="btn-icon">▶️</span>
+          Start Scan
+        </button>
+        <button class="btn btn-secondary hidden" id="stop-scan-btn">
+          <span class="btn-icon">⏹️</span>
+          Stop Scan
+        </button>
+      </div>
+
+      <div class="results-section hidden" id="results-section">
+        <div class="results-header">
+          <h3>Non-Mutual Followers</h3>
+          <div class="results-count" id="results-count">0 found</div>
+        </div>
+        
+        <div class="results-actions">
+          <button class="btn btn-outline" id="export-results-btn">
+            <span class="btn-icon">📥</span>
+            Export Results
+          </button>
+          <button class="btn btn-outline" id="select-all-btn">
+            <span class="btn-icon">☑️</span>
+            Select All
+          </button>
+        </div>
+
+        <div class="search-box">
+          <input type="text" id="search-results" placeholder="Search users..." class="search-input">
+        </div>
+
+        <div class="results-list" id="results-list">
+          <!-- Results will be populated here -->
+        </div>
+      </div>
+
+      <div class="page-warning hidden" id="page-warning">
+        <div class="warning-icon">⚠️</div>
+        <div class="warning-text">
+          Please navigate to your Following page on X (twitter.com/username/following) to use this extension.
+        </div>
+      </div>
+    </div>
+
+    <!-- Allowlist Tab -->
+    <div class="tab-content" id="allowlist-tab">
+      <div class="allowlist-header">
+        <h3>Allowlist Management</h3>
+        <p class="allowlist-description">
+          Users in your allowlist won't be flagged as non-mutual followers
+        </p>
+      </div>
+
+      <div class="allowlist-controls">
+        <div class="input-group">
+          <input 
+            type="text" 
+            id="add-user-input" 
+            placeholder="Enter username (e.g., sama, elonmusk)" 
+            class="add-user-input"
+            maxlength="15"
+            pattern="[a-zA-Z0-9_]{1,15}"
+            title="Username can only contain letters, numbers, and underscores (max 15 characters)"
+          >
+          <button class="btn btn-primary" id="add-user-btn">
+            <span class="btn-icon">➕</span>
+            Add
+          </button>
+        </div>
+        <div class="input-help">
+          <small>💡 You can add users with or without the @ symbol (e.g., "sama" or "@sama")</small>
+        </div>
+      </div>
+
+      <div class="allowlist-stats">
+        <div class="stat-item">
+          <span class="stat-number" id="allowlist-count">0</span>
+          <span class="stat-label">Users in allowlist</span>
+        </div>
+      </div>
+
+      <div class="allowlist-actions">
+        <button class="btn btn-outline" id="import-allowlist-btn">
+          <span class="btn-icon">📁</span>
+          Import
+        </button>
+        <button class="btn btn-outline" id="export-allowlist-btn">
+          <span class="btn-icon">💾</span>
+          Export
+        </button>
+        <button class="btn btn-danger" id="clear-allowlist-btn">
+          <span class="btn-icon">🗑️</span>
+          Clear All
+        </button>
+      </div>
+
+      <div class="allowlist-list" id="allowlist-list">
+        <!-- Allowlist items will be populated here -->
+      </div>
+    </div>
+
+    <!-- History Tab -->
+    <div class="tab-content" id="history-tab">
+      <div class="history-header">
+        <h3>Scan History</h3>
+        <button class="btn btn-outline" id="clear-history-btn">
+          <span class="btn-icon">🗑️</span>
+          Clear History
+        </button>
+      </div>
+
+      <div class="history-list" id="history-list">
+        <!-- History items will be populated here -->
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div class="tab-content" id="settings-tab">
+      <div class="settings-header">
+        <h3>Settings</h3>
+      </div>
+
+      <div class="settings-group">
+        <label class="setting-label">
+          Scroll Delay (ms)
+          <input type="range" id="scroll-delay" min="1000" max="5000" step="500" class="slider">
+          <span class="slider-value" id="scroll-delay-value">2000ms</span>
+        </label>
+        <p class="setting-description">
+          Time to wait between scrolls. Increase if experiencing rate limits.
+        </p>
+      </div>
+
+      <div class="settings-group">
+        <label class="setting-label">
+          Batch Size
+          <input type="range" id="batch-size" min="25" max="100" step="25" class="slider">
+          <span class="slider-value" id="batch-size-value">50</span>
+        </label>
+        <p class="setting-description">
+          Number of users to process in each batch. Lower values use less memory.
+        </p>
+      </div>
+
+      <div class="settings-group">
+        <label class="setting-checkbox">
+          <input type="checkbox" id="enable-notifications">
+          <span class="checkmark"></span>
+          Enable notifications
+        </label>
+        <p class="setting-description">
+          Show notifications when scans complete.
+        </p>
+      </div>
+
+      <div class="settings-actions">
+        <button class="btn btn-primary" id="save-settings-btn">Save Settings</button>
+        <button class="btn btn-outline" id="reset-settings-btn">Reset to Default</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="https://help.x.com" target="_blank" class="footer-link">X Help Center</a>
+        <a href="#" id="about-link" class="footer-link">About</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Hidden file input for imports -->
+  <input type="file" id="file-input" accept=".json" style="display: none;">
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay hidden" id="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading...</div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

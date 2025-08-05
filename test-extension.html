@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test X Unfollow Checker Extension</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        #log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        input {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: rgba(40, 167, 69, 0.3); }
+        .error { background: rgba(220, 53, 69, 0.3); }
+        .info { background: rgba(23, 162, 184, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 X Unfollow Checker Extension Test</h1>
+        
+        <div class="test-section">
+            <h3>📝 Extension Communication Test</h3>
+            <p>This page tests the communication between the webpage and the Chrome extension.</p>
+            <button onclick="testExtensionConnection()">Test Extension Connection</button>
+            <button onclick="checkExtensionId()">Check Extension ID</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Allowlist Testing</h3>
+            <input type="text" id="testUsername" placeholder="Enter username (e.g., sama)" />
+            <button onclick="testAddToAllowlist()">Add to Allowlist</button>
+            <button onclick="testGetAllowlist()">Get Allowlist</button>
+            <button onclick="testRemoveFromAllowlist()">Remove from Allowlist</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Debug Actions</h3>
+            <button onclick="clearLogs()">Clear Logs</button>
+            <button onclick="testChromeStorage()">Test Chrome Storage</button>
+            <button onclick="reloadExtension()">Instructions to Reload Extension</button>
+        </div>
+
+        <div id="status"></div>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const log = document.getElementById('log');
+        const status = document.getElementById('status');
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logEntry.style.color = type === 'error' ? '#ff6b6b' : 
+                                  type === 'success' ? '#51cf66' : 
+                                  type === 'warning' ? '#ffd43b' : '#74c0fc';
+            log.appendChild(logEntry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function showStatus(message, type = 'info') {
+            status.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => status.innerHTML = '', 5000);
+        }
+
+        function clearLogs() {
+            log.innerHTML = '';
+            addLog('Logs cleared', 'info');
+        }
+
+        async function testExtensionConnection() {
+            addLog('🔌 Testing extension connection...', 'info');
+            
+            if (!window.chrome || !chrome.runtime) {
+                addLog('❌ Chrome runtime not available', 'error');
+                showStatus('Chrome runtime not available - not running in Chrome extension context', 'error');
+                return;
+            }
+
+            try {
+                const response = await chrome.runtime.sendMessage({
+                    type: 'GET_ALLOWLIST'
+                });
+                
+                addLog(`✅ Extension connection successful`, 'success');
+                addLog(`📄 Response: ${JSON.stringify(response, null, 2)}`, 'info');
+                showStatus('Extension connection successful!', 'success');
+            } catch (error) {
+                addLog(`❌ Extension connection failed: ${error.message}`, 'error');
+                showStatus(`Connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        function checkExtensionId() {
+            if (chrome && chrome.runtime && chrome.runtime.id) {
+                addLog(`🆔 Extension ID: ${chrome.runtime.id}`, 'info');
+                showStatus(`Extension ID: ${chrome.runtime.id}`, 'info');
+            } else {
+                addLog('❌ Cannot get extension ID', 'error');
+                showStatus('Cannot get extension ID', 'error');
+            }
+        }
+
+        async function testAddToAllowlist() {
+            const username = document.getElementById('testUsername').value.trim();
+            if (!username) {
+                showStatus('Please enter a username', 'error');
+                return;
+            }
+
+            addLog(`➕ Adding '${username}' to allowlist...`, 'info');
+            
+            try {
+                const response = await chrome.runtime.sendMessage({
+                    type: 'ADD_TO_ALLOWLIST',
+                    username: username
+                });
+                
+                addLog(`📄 Add response: ${JSON.stringify(response, null, 2)}`, 'info');
+                
+                if (response.success) {
+                    addLog(`✅ Successfully added '${username}' to allowlist`, 'success');
+                    showStatus(`Added ${username} to allowlist`, 'success');
+                } else {
+                    addLog(`❌ Failed to add '${username}': ${response.error}`, 'error');
+                    showStatus(`Failed: ${response.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Error adding to allowlist: ${error.message}`, 'error');
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGetAllowlist() {
+            addLog('📋 Getting allowlist...', 'info');
+            
+            try {
+                const response = await chrome.runtime.sendMessage({
+                    type: 'GET_ALLOWLIST'
+                });
+                
+                addLog(`📄 Allowlist response: ${JSON.stringify(response, null, 2)}`, 'info');
+                
+                if (response.success) {
+                    addLog(`✅ Current allowlist (${response.allowlist.length} users): ${response.allowlist.join(', ')}`, 'success');
+                    showStatus(`Allowlist has ${response.allowlist.length} users`, 'success');
+                } else {
+                    addLog(`❌ Failed to get allowlist: ${response.error}`, 'error');
+                    showStatus(`Failed: ${response.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Error getting allowlist: ${error.message}`, 'error');
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testRemoveFromAllowlist() {
+            const username = document.getElementById('testUsername').value.trim();
+            if (!username) {
+                showStatus('Please enter a username', 'error');
+                return;
+            }
+
+            addLog(`➖ Removing '${username}' from allowlist...`, 'info');
+            
+            try {
+                const response = await chrome.runtime.sendMessage({
+                    type: 'REMOVE_FROM_ALLOWLIST',
+                    username: username
+                });
+                
+                addLog(`📄 Remove response: ${JSON.stringify(response, null, 2)}`, 'info');
+                
+                if (response.success) {
+                    addLog(`✅ Successfully removed '${username}' from allowlist`, 'success');
+                    showStatus(`Removed ${username} from allowlist`, 'success');
+                } else {
+                    addLog(`❌ Failed to remove '${username}': ${response.error}`, 'error');
+                    showStatus(`Failed: ${response.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Error removing from allowlist: ${error.message}`, 'error');
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testChromeStorage() {
+            addLog('💾 Testing Chrome storage...', 'info');
+            
+            try {
+                // Test setting a value
+                await chrome.storage.local.set({ testKey: 'testValue' });
+                addLog('✅ Successfully wrote to storage', 'success');
+                
+                // Test getting the value
+                const result = await chrome.storage.local.get(['testKey']);
+                addLog(`✅ Successfully read from storage: ${JSON.stringify(result)}`, 'success');
+                
+                // Clean up
+                await chrome.storage.local.remove(['testKey']);
+                addLog('✅ Successfully cleaned up test data', 'success');
+                
+                showStatus('Chrome storage test passed', 'success');
+            } catch (error) {
+                addLog(`❌ Chrome storage test failed: ${error.message}`, 'error');
+                showStatus(`Storage test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function reloadExtension() {
+            const instructions = `
+🔄 To reload the extension:
+1. Open Chrome Extensions (chrome://extensions/)
+2. Find "X Unfollow Checker"
+3. Click the reload/refresh button
+4. Close and reopen this popup
+            `;
+            addLog(instructions, 'warning');
+            showStatus('Extension reload instructions shown in log', 'info');
+        }
+
+        // Initialize
+        addLog('🚀 X Unfollow Checker Extension Test Page Loaded', 'success');
+        addLog('Use the buttons above to test different extension features', 'info');
+    </script>
+</body>
+</html>
