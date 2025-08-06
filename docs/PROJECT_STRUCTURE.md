@@ -1,6 +1,7 @@
 # Project Structure
 
-This document explains the organization and structure of the X Unfollow Checker project.
+This document explains the organization and structure of the X Unfollow Checker
+project.
 
 ## 📁 Root Directory
 
@@ -31,20 +32,26 @@ x-unfollow-checker/
 ## 📁 Directory Breakdown
 
 ### `.github/`
+
 GitHub-specific configuration files:
+
 - **workflows/**: GitHub Actions CI/CD pipelines
 - **ISSUE_TEMPLATE/**: Issue templates for bugs, features, questions
 - **pull_request_template.md**: PR template
 
 ### `icons/`
+
 Extension icons in various sizes:
+
 - `icon16.png` - Toolbar icon
 - `icon32.png` - Management page icon
 - `icon48.png` - Extension management
 - `icon128.png` - Chrome Web Store
 
 ### `scripts/`
+
 Build tools and utility scripts:
+
 - `build.js` - Main build script
 - `generate-icons.js` - Icon generation
 - `test.js` - Test runner
@@ -52,7 +59,9 @@ Build tools and utility scripts:
 - `package.js` - Packaging for distribution
 
 ### `src/` (Future)
+
 Organized source code for larger projects:
+
 ```
 src/
 ├── components/     # Reusable UI components
@@ -63,14 +72,18 @@ src/
 ```
 
 ### `docs/`
+
 Additional documentation:
+
 - API documentation
 - User guides
 - Development guides
 - Architecture diagrams
 
 ### `tests/`
+
 Test files and test utilities:
+
 - Unit tests
 - Integration tests
 - End-to-end tests
@@ -134,9 +147,11 @@ Actions      API                 Pages
 ## 📦 Dependencies
 
 ### Production Dependencies
+
 None - Extension runs standalone in browser
 
 ### Development Dependencies
+
 - **ESLint**: Code linting and style enforcement
 - **Prettier**: Code formatting
 - **Rimraf**: Cross-platform file removal
@@ -146,15 +161,18 @@ None - Extension runs standalone in browser
 ## 🔀 Branching Strategy
 
 ### Main Branches
+
 - `main` - Production-ready code
 - `develop` - Development integration branch
 
 ### Feature Branches
+
 - `feature/feature-name` - New features
 - `fix/bug-description` - Bug fixes
 - `docs/update-description` - Documentation updates
 
 ### Release Process
+
 1. Feature development in feature branches
 2. Merge to `develop` for integration testing
 3. Merge to `main` for release
@@ -163,32 +181,38 @@ None - Extension runs standalone in browser
 ## 📝 File Naming Conventions
 
 ### JavaScript Files
+
 - `kebab-case.js` for utility files
 - `PascalCase.js` for classes/components
 - `camelCase` for variables and functions
 
 ### CSS Files
+
 - `kebab-case.css` for stylesheets
 - BEM methodology for class names
 - CSS custom properties for theming
 
 ### Documentation
+
 - `UPPERCASE.md` for important docs (README, LICENSE)
 - `PascalCase.md` for guides and documentation
 
 ## 🧪 Testing Strategy
 
 ### Unit Tests
+
 - Individual function testing
 - Component isolation testing
 - Mock external dependencies
 
 ### Integration Tests
+
 - Component interaction testing
 - Chrome API integration
 - Data flow validation
 
 ### End-to-End Tests
+
 - Full user workflow testing
 - Cross-browser compatibility
 - Performance testing
@@ -196,11 +220,13 @@ None - Extension runs standalone in browser
 ## 🔒 Security Considerations
 
 ### File Organization
+
 - Sensitive logic in background script
 - Input validation in all components
 - Secure coding practices throughout
 
 ### Permission Management
+
 - Minimal required permissions
 - Clear permission justification
 - Regular permission audits
@@ -208,11 +234,13 @@ None - Extension runs standalone in browser
 ## 🚀 Deployment
 
 ### Development
+
 1. Load unpacked extension in browser
 2. Enable developer mode
 3. Point to project root directory
 
 ### Production
+
 1. Build optimized package
 2. Test in clean browser environment
 3. Submit to Chrome Web Store
@@ -221,20 +249,25 @@ None - Extension runs standalone in browser
 ## 📚 Documentation Standards
 
 ### Code Documentation
+
 - JSDoc comments for functions
 - Inline comments for complex logic
 - README files in subdirectories
 
 ### User Documentation
+
 - Clear installation instructions
 - Feature usage guides
 - Troubleshooting information
 
 ### Developer Documentation
+
 - Architecture explanations
 - API documentation
 - Contributing guidelines
 
 ---
 
-This structure supports the project's growth from a simple extension to a more complex, maintainable codebase while keeping the current flat structure for simplicity.
+This structure supports the project's growth from a simple extension to a more
+complex, maintainable codebase while keeping the current flat structure for
+simplicity.

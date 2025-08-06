@@ -7,7 +7,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
@@ -34,8 +35,9 @@ body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 20px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 
-              0 0 0 1px rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
   overflow: hidden;
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -59,15 +61,19 @@ body {
   right: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
   background-size: 20px 20px;
   animation: float 20s linear infinite;
   opacity: 0.6;
 }
 
 @keyframes float {
-  0% { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
 /* Custom Scrollbar */
@@ -229,8 +235,13 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
 }
 
 .status-icon {
@@ -287,7 +298,7 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 0.5s;
 }
 
@@ -819,7 +830,7 @@ body {
   color: #333;
 }
 
-.setting-checkbox input[type="checkbox"] {
+.setting-checkbox input[type='checkbox'] {
   display: none;
 }
 
@@ -833,12 +844,12 @@ body {
   transition: all 0.2s ease;
 }
 
-.setting-checkbox input[type="checkbox"]:checked + .checkmark {
+.setting-checkbox input[type='checkbox']:checked + .checkmark {
   background: #1da1f2;
   border-color: #1da1f2;
 }
 
-.setting-checkbox input[type="checkbox"]:checked + .checkmark::after {
+.setting-checkbox input[type='checkbox']:checked + .checkmark::after {
   content: '✓';
   position: absolute;
   top: 50%;
@@ -934,8 +945,12 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-text {
@@ -956,34 +971,42 @@ body {
   color: #6c757d;
 }
 
-.mb-0 { margin-bottom: 0; }
-.mb-1 { margin-bottom: 0.5rem; }
-.mb-2 { margin-bottom: 1rem; }
-.mb-3 { margin-bottom: 1.5rem; }
+.mb-0 {
+  margin-bottom: 0;
+}
+.mb-1 {
+  margin-bottom: 0.5rem;
+}
+.mb-2 {
+  margin-bottom: 1rem;
+}
+.mb-3 {
+  margin-bottom: 1.5rem;
+}
 
 /* Responsive Design */
 @media (max-width: 420px) {
   .popup-container {
     width: 360px;
   }
-  
+
   .title {
     font-size: 1.2rem;
   }
-  
+
   .tab-btn {
     font-size: 0.8rem;
     padding: 10px 6px;
   }
-  
+
   .results-actions {
     flex-direction: column;
   }
-  
+
   .allowlist-actions {
     flex-direction: column;
   }
-  
+
   .settings-actions {
     flex-direction: column;
   }

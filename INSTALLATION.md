@@ -1,6 +1,7 @@
 # Installation Guide - X Unfollow Checker
 
-This guide will walk you through installing the X Unfollow Checker extension on different browsers.
+This guide will walk you through installing the X Unfollow Checker extension on
+different browsers.
 
 ## 📋 Prerequisites
 
@@ -13,12 +14,14 @@ This guide will walk you through installing the X Unfollow Checker extension on 
 First, you need to get the extension files:
 
 ### Option 1: Download from GitHub
+
 1. Go to the GitHub repository
 2. Click the green "Code" button
 3. Select "Download ZIP"
 4. Extract the ZIP file to a folder on your computer
 
 ### Option 2: Clone with Git
+
 ```bash
 git clone https://github.com/Edmon02/x-unfollow-checker
 cd x-unfollow-checker
@@ -26,7 +29,8 @@ cd x-unfollow-checker
 
 ## 🎨 Create Extension Icons
 
-The extension needs icon files. Create or download 16x16, 32x32, 48x48, and 128x128 pixel PNG icons:
+The extension needs icon files. Create or download 16x16, 32x32, 48x48, and
+128x128 pixel PNG icons:
 
 1. Create an `icons` folder in the extension directory
 2. Add these files:
@@ -36,6 +40,7 @@ The extension needs icon files. Create or download 16x16, 32x32, 48x48, and 128x
    - `icon128.png` (128x128 pixels)
 
 **Icon Design Tips:**
+
 - Use a simple, recognizable design
 - Include the X logo or unfollow concept
 - Ensure good contrast for visibility
@@ -79,7 +84,9 @@ The extension needs icon files. Create or download 16x16, 32x32, 48x48, and 128x
    - Extension appears in the temporary extensions list
    - Icon should be visible in the toolbar
 
-**Note**: In Firefox, temporary extensions are removed when you restart the browser. For permanent installation, you'll need to sign and distribute the extension.
+**Note**: In Firefox, temporary extensions are removed when you restart the
+browser. For permanent installation, you'll need to sign and distribute the
+extension.
 
 ### Safari (macOS)
 
@@ -119,6 +126,7 @@ After installation, verify the extension works:
 **Problem**: "Failed to load extension" error
 
 **Solutions**:
+
 - Check that all files are present (manifest.json, background.js, etc.)
 - Verify manifest.json syntax is correct
 - Ensure icon files exist in the icons folder
@@ -129,6 +137,7 @@ After installation, verify the extension works:
 **Problem**: Extension appears but popup is blank or features don't work
 
 **Solutions**:
+
 - Check browser console for JavaScript errors
 - Verify you're on the correct X page (/following)
 - Disable other extensions temporarily
@@ -139,6 +148,7 @@ After installation, verify the extension works:
 **Problem**: Extension works but shows default icon
 
 **Solutions**:
+
 - Verify icon files are in the correct icons/ folder
 - Check file names match manifest.json exactly
 - Ensure icons are PNG format
@@ -149,6 +159,7 @@ After installation, verify the extension works:
 **Problem**: Extension can't access X pages
 
 **Solutions**:
+
 - Verify host_permissions in manifest.json
 - Try reloading the extension
 - Check if other extensions are blocking access
@@ -203,12 +214,14 @@ Consider using the desktop version for full functionality.
 ### For Developers
 
 **Development Mode Features**:
+
 - Real-time code editing
 - Console debugging
 - Performance monitoring
 - Extension reloading
 
 **Build Process**:
+
 ```bash
 # If using build tools
 npm install
@@ -219,11 +232,13 @@ npm run test
 ### Enterprise Deployment
 
 **Group Policy (Chrome)**:
+
 - Add extension to enterprise policies
 - Deploy via Google Admin Console
 - Control permissions centrally
 
 **Firefox Enterprise**:
+
 - Use Firefox ESR
 - Deploy via Active Directory
 - Configure via policies.json
@@ -238,8 +253,10 @@ If you encounter issues during installation:
 
 2. **Browser Help**
    - Chrome: [Extension Help](https://support.google.com/chrome/answer/9658361)
-   - Firefox: [Add-on Help](https://support.mozilla.org/kb/find-and-install-add-ons-add-features-to-firefox)
-   - Edge: [Extension Help](https://support.microsoft.com/en-us/microsoft-edge/add-turn-off-or-remove-extensions-in-microsoft-edge-9c0ec68c-2fbc-2f2c-9ff0-bdc76f46b026)
+   - Firefox:
+     [Add-on Help](https://support.mozilla.org/kb/find-and-install-add-ons-add-features-to-firefox)
+   - Edge:
+     [Extension Help](https://support.microsoft.com/en-us/microsoft-edge/add-turn-off-or-remove-extensions-in-microsoft-edge-9c0ec68c-2fbc-2f2c-9ff0-bdc76f46b026)
 
 3. **Community Support**
    - GitHub Discussions
@@ -273,4 +290,5 @@ If you encounter issues during installation:
 
 ---
 
-**Next Steps**: Once installed, check out the [Usage Guide](USAGE.md) to learn how to use all the extension's features effectively.
+**Next Steps**: Once installed, check out the [Usage Guide](USAGE.md) to learn
+how to use all the extension's features effectively.

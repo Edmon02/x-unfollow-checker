@@ -8,30 +8,30 @@ class PopupManager {
     this.settings = {};
     this.isScanning = false;
     this.selectedUsers = new Set();
-    
+
     this.init();
   }
 
   async init() {
     // Initialize event listeners
     this.initializeEventListeners();
-    
+
     // Load initial data
     await this.loadInitialData();
-    
+
     // Check if we're on the correct page
     await this.checkCurrentPage();
-    
+
     // Set up message listener for scan updates
     this.setupMessageListener();
-    
+
     console.log('Popup initialized');
   }
 
   initializeEventListeners() {
     // Tab navigation
     document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', e => {
         this.switchTab(e.target.dataset.tab);
       });
     });
@@ -54,7 +54,7 @@ class PopupManager {
       this.toggleSelectAll();
     });
 
-    document.getElementById('search-results').addEventListener('input', (e) => {
+    document.getElementById('search-results').addEventListener('input', e => {
       this.filterResults(e.target.value);
     });
 
@@ -64,19 +64,19 @@ class PopupManager {
     });
 
     const addUserInput = document.getElementById('add-user-input');
-    
-    addUserInput.addEventListener('keypress', (e) => {
+
+    addUserInput.addEventListener('keypress', e => {
       if (e.key === 'Enter') {
         this.addToAllowlist();
       }
     });
 
     // Real-time validation feedback
-    addUserInput.addEventListener('input', (e) => {
+    addUserInput.addEventListener('input', e => {
       this.validateUsernameInput(e.target);
     });
 
-    addUserInput.addEventListener('paste', (e) => {
+    addUserInput.addEventListener('paste', e => {
       // Allow paste but validate after a short delay
       setTimeout(() => this.validateUsernameInput(e.target), 10);
     });
@@ -99,11 +99,11 @@ class PopupManager {
     });
 
     // Settings controls
-    document.getElementById('scroll-delay').addEventListener('input', (e) => {
+    document.getElementById('scroll-delay').addEventListener('input', e => {
       document.getElementById('scroll-delay-value').textContent = e.target.value + 'ms';
     });
 
-    document.getElementById('batch-size').addEventListener('input', (e) => {
+    document.getElementById('batch-size').addEventListener('input', e => {
       document.getElementById('batch-size-value').textContent = e.target.value;
     });
 
@@ -116,12 +116,12 @@ class PopupManager {
     });
 
     // File input for imports
-    document.getElementById('file-input').addEventListener('change', (e) => {
+    document.getElementById('file-input').addEventListener('change', e => {
       this.handleFileImport(e.target.files[0]);
     });
 
     // About link
-    document.getElementById('about-link').addEventListener('click', (e) => {
+    document.getElementById('about-link').addEventListener('click', e => {
       e.preventDefault();
       this.showAbout();
     });
@@ -133,11 +133,11 @@ class PopupManager {
       console.log('🔧 DEBUG: Testing background script connection...');
       const testResponse = await chrome.runtime.sendMessage({ type: 'GET_ALLOWLIST' });
       console.log('🔧 DEBUG: Background script test response:', testResponse);
-      
+
       if (!testResponse) {
         throw new Error('Background script is not responding. Extension may need to be reloaded.');
       }
-      
+
       // Load allowlist
       const allowlistResponse = await chrome.runtime.sendMessage({ type: 'GET_ALLOWLIST' });
       if (allowlistResponse.success) {
@@ -167,14 +167,14 @@ class PopupManager {
   async checkCurrentPage() {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      
+
       if (!tab.url) {
-        this.showPageWarning('Cannot detect current page. Please make sure you\'re on X.');
+        this.showPageWarning("Cannot detect current page. Please make sure you're on X.");
         return;
       }
-      
+
       const url = tab.url.toLowerCase();
-      
+
       if (!url.includes('x.com') && !url.includes('twitter.com')) {
         this.showPageWarning('Please navigate to X (Twitter) to use this extension.');
         return;
@@ -187,13 +187,15 @@ class PopupManager {
 
       // Check if it's actually a user's following page (not just any page with "following" in URL)
       if (!url.match(/\/([\w\d_]+)\/following/)) {
-        this.showPageWarning('Please navigate to a user\'s Following page (e.g., x.com/username/following).');
+        this.showPageWarning(
+          "Please navigate to a user's Following page (e.g., x.com/username/following)."
+        );
         return;
       }
 
       // Hide warning if on correct page
       document.getElementById('page-warning').classList.add('hidden');
-      
+
       // Enable scan button
       const startBtn = document.getElementById('start-scan-btn');
       if (startBtn) {
@@ -201,7 +203,7 @@ class PopupManager {
       }
     } catch (error) {
       console.error('Error checking current page:', error);
-      this.showPageWarning('Unable to detect current page. Please make sure you\'re on X.');
+      this.showPageWarning("Unable to detect current page. Please make sure you're on X.");
     }
   }
 
@@ -209,7 +211,7 @@ class PopupManager {
     const warningElement = document.getElementById('page-warning');
     warningElement.querySelector('.warning-text').textContent = message;
     warningElement.classList.remove('hidden');
-    
+
     // Disable scan button
     document.getElementById('start-scan-btn').disabled = true;
   }
@@ -250,10 +252,10 @@ class PopupManager {
   async startScan() {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      
+
       // Update UI to show we're attempting to start
       this.updateStatusCard('🔄', 'Connecting...', 'Establishing connection with the page...');
-      
+
       // Check if content script is loaded
       let response;
       try {
@@ -263,39 +265,47 @@ class PopupManager {
         // Content script not loaded, try to inject it
         console.log('Content script not found, injecting...', error);
         this.updateStatusCard('🔄', 'Initializing...', 'Loading extension components...');
-        
+
         try {
           await chrome.scripting.executeScript({
             target: { tabId: tab.id },
             files: ['content.js']
           });
-          
+
           // Wait a bit for script to initialize
           await new Promise(resolve => setTimeout(resolve, 2000));
-          
+
           // Try to connect again
           response = await chrome.tabs.sendMessage(tab.id, { type: 'GET_SCAN_STATUS' });
           console.log('Content script status after injection:', response);
         } catch (injectionError) {
           console.error('Failed to inject content script:', injectionError);
-          throw new Error('Could not load extension on this page. Please refresh the page and try again. Make sure you\'re on a X.com following page.');
+          throw new Error(
+            "Could not load extension on this page. Please refresh the page and try again. Make sure you're on a X.com following page."
+          );
         }
       }
-      
+
       // Verify we're on the right page by checking the response
       if (!response || !response.success) {
-        throw new Error('Extension could not connect to the page. Please make sure you\'re on X.com and refresh the page.');
+        throw new Error(
+          "Extension could not connect to the page. Please make sure you're on X.com and refresh the page."
+        );
       }
-      
+
       // Send message to content script to start scan
       this.updateStatusCard('🔄', 'Starting scan...', 'Initializing the scanning process...');
       response = await chrome.tabs.sendMessage(tab.id, { type: 'START_SCAN' });
       console.log('Start scan response:', response);
-      
+
       if (response && response.success) {
         this.isScanning = true;
         this.updateScanUI(true);
-        this.updateStatusCard('🔄', 'Scanning...', 'Analyzing your following list, this may take a few minutes.');
+        this.updateStatusCard(
+          '🔄',
+          'Scanning...',
+          'Analyzing your following list, this may take a few minutes.'
+        );
         this.showSuccess('Scan started successfully!');
       } else {
         throw new Error(response?.error || 'Failed to start scan');
@@ -310,9 +320,9 @@ class PopupManager {
   async stopScan() {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      
+
       const response = await chrome.tabs.sendMessage(tab.id, { type: 'STOP_SCAN' });
-      
+
       if (response && response.success) {
         this.isScanning = false;
         this.updateScanUI(false);
@@ -329,10 +339,13 @@ class PopupManager {
       this.isScanning = false;
       this.scanResults = status.results.nonMutualFollowers;
       this.updateScanUI(false);
-      this.updateStatusCard('✅', 'Scan completed!', 
-        `Found ${status.results.nonMutualFollowers.length} non-mutual followers out of ${status.results.totalFollowing} total following.`);
+      this.updateStatusCard(
+        '✅',
+        'Scan completed!',
+        `Found ${status.results.nonMutualFollowers.length} non-mutual followers out of ${status.results.totalFollowing} total following.`
+      );
       this.displayResults(status.results.nonMutualFollowers);
-      
+
       // Switch to scanner tab if not already there
       if (this.currentTab !== 'scanner') {
         this.switchTab('scanner');
@@ -346,7 +359,7 @@ class PopupManager {
   updateScanUI(isScanning) {
     const startBtn = document.getElementById('start-scan-btn');
     const stopBtn = document.getElementById('stop-scan-btn');
-    
+
     if (isScanning) {
       startBtn.classList.add('hidden');
       stopBtn.classList.remove('hidden');
@@ -361,11 +374,11 @@ class PopupManager {
     const statusIcon = statusCard.querySelector('.status-icon');
     const statusText = statusCard.querySelector('.status-text');
     const statusDetails = document.getElementById('status-details');
-    
+
     statusIcon.textContent = icon;
     statusText.textContent = title;
     statusDetails.textContent = message;
-    
+
     // Update card styling
     statusCard.classList.remove('scanning', 'completed', 'error');
     if (isError) {
@@ -381,10 +394,10 @@ class PopupManager {
     this.scanResults = results;
     document.getElementById('results-section').classList.remove('hidden');
     document.getElementById('results-count').textContent = `${results.length} found`;
-    
+
     const resultsList = document.getElementById('results-list');
     resultsList.innerHTML = '';
-    
+
     if (results.length === 0) {
       resultsList.innerHTML = `
         <div style="padding: 40px; text-align: center; color: #6c757d;">
@@ -395,7 +408,7 @@ class PopupManager {
       `;
       return;
     }
-    
+
     results.forEach((user, index) => {
       const resultItem = this.createResultItem(user, index);
       resultsList.appendChild(resultItem);
@@ -407,7 +420,7 @@ class PopupManager {
     item.className = 'result-item';
     item.dataset.username = user.username.toLowerCase();
     item.dataset.displayName = user.displayName.toLowerCase();
-    
+
     item.innerHTML = `
       <input type="checkbox" class="result-checkbox" data-index="${index}">
       <div class="result-info">
@@ -420,10 +433,10 @@ class PopupManager {
         </button>
       </div>
     `;
-    
+
     // Add event listeners
     const checkbox = item.querySelector('.result-checkbox');
-    checkbox.addEventListener('change', (e) => {
+    checkbox.addEventListener('change', e => {
       if (e.target.checked) {
         this.selectedUsers.add(index);
       } else {
@@ -431,23 +444,23 @@ class PopupManager {
       }
       this.updateSelectAllButton();
     });
-    
+
     const allowlistBtn = item.querySelector('.add-to-allowlist-btn');
     allowlistBtn.addEventListener('click', () => {
       this.addUserToAllowlist(user.username);
     });
-    
+
     return item;
   }
 
   filterResults(query) {
     const resultItems = document.querySelectorAll('.result-item');
     const searchTerm = query.toLowerCase().trim();
-    
+
     resultItems.forEach(item => {
       const username = item.dataset.username;
       const displayName = item.dataset.displayName;
-      
+
       if (username.includes(searchTerm) || displayName.includes(searchTerm)) {
         item.style.display = 'flex';
       } else {
@@ -460,7 +473,7 @@ class PopupManager {
     const checkboxes = document.querySelectorAll('.result-checkbox');
     const selectAllBtn = document.getElementById('select-all-btn');
     const allSelected = this.selectedUsers.size === checkboxes.length;
-    
+
     if (allSelected) {
       // Deselect all
       checkboxes.forEach(checkbox => {
@@ -485,7 +498,7 @@ class PopupManager {
     const checkboxes = document.querySelectorAll('.result-checkbox');
     const selectAllBtn = document.getElementById('select-all-btn');
     const allSelected = this.selectedUsers.size === checkboxes.length;
-    
+
     if (allSelected && checkboxes.length > 0) {
       selectAllBtn.innerHTML = '<span class="btn-icon">☐</span>Deselect All';
     } else {
@@ -498,11 +511,12 @@ class PopupManager {
       this.showError('No results to export');
       return;
     }
-    
-    const selectedResults = this.selectedUsers.size > 0 
-      ? this.scanResults.filter((_, index) => this.selectedUsers.has(index))
-      : this.scanResults;
-    
+
+    const selectedResults =
+      this.selectedUsers.size > 0
+        ? this.scanResults.filter((_, index) => this.selectedUsers.has(index))
+        : this.scanResults;
+
     const exportData = {
       exportDate: new Date().toISOString(),
       type: 'non_mutual_followers',
@@ -513,22 +527,25 @@ class PopupManager {
         profileUrl: user.profileUrl
       }))
     };
-    
-    this.downloadJSON(exportData, `x-unfollow-checker-results-${new Date().toISOString().split('T')[0]}.json`);
+
+    this.downloadJSON(
+      exportData,
+      `x-unfollow-checker-results-${new Date().toISOString().split('T')[0]}.json`
+    );
   }
 
   // Allowlist Management
   async addToAllowlist() {
     const input = document.getElementById('add-user-input');
     let username = input.value.trim();
-    
+
     console.log('🔧 DEBUG: Starting addToAllowlist with input:', username);
-    
+
     // Remove @ symbol if present
     username = username.replace(/^@+/, '');
-    
+
     console.log('🔧 DEBUG: Cleaned username:', username);
-    
+
     // Validate input
     if (!username) {
       console.log('🔧 DEBUG: Empty username detected');
@@ -540,15 +557,19 @@ class PopupManager {
     // Validate username format (Twitter usernames can contain letters, numbers, and underscores)
     if (!/^[a-zA-Z0-9_]{1,15}$/.test(username)) {
       console.log('🔧 DEBUG: Invalid username format:', username);
-      this.showError('Invalid username format. Use only letters, numbers, and underscores (max 15 characters)');
+      this.showError(
+        'Invalid username format. Use only letters, numbers, and underscores (max 15 characters)'
+      );
       input.focus();
       return;
     }
 
     console.log('🔧 DEBUG: Current allowlist:', this.allowlist);
-    
+
     // Check if already in allowlist (but don't prevent, let backend handle it)
-    const isAlreadyInList = this.allowlist.some(user => user.toLowerCase() === username.toLowerCase());
+    const isAlreadyInList = this.allowlist.some(
+      user => user.toLowerCase() === username.toLowerCase()
+    );
     if (isAlreadyInList) {
       console.log('🔧 DEBUG: User already in allowlist');
       this.showError(`@${username} is already in your allowlist`);
@@ -564,41 +585,46 @@ class PopupManager {
 
     try {
       console.log('🔧 DEBUG: Sending ADD_TO_ALLOWLIST message for:', username);
-      
+
       // Test if chrome.runtime is available
       if (!chrome.runtime || !chrome.runtime.sendMessage) {
         throw new Error('Chrome runtime not available. Extension may need to be reloaded.');
       }
-      
+
       // Create a promise with timeout to prevent hanging
       const messagePromise = chrome.runtime.sendMessage({
         type: 'ADD_TO_ALLOWLIST',
         username: username.toLowerCase() // Store in lowercase for consistency
       });
-      
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout - background script not responding')), 10000)
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Request timeout - background script not responding')),
+          10000
+        )
       );
-      
+
       const response = await Promise.race([messagePromise, timeoutPromise]);
-      
+
       console.log('🔧 DEBUG: Raw response from background:', response);
-      
+
       if (!response) {
-        throw new Error('No response received from background script. Extension may need to be reloaded.');
+        throw new Error(
+          'No response received from background script. Extension may need to be reloaded.'
+        );
       }
-      
+
       if (response.success) {
         console.log('🔧 DEBUG: Successfully added to allowlist');
         this.allowlist = response.allowlist || [];
         this.updateAllowlistDisplay();
         input.value = '';
         this.showSuccess(`✅ Added @${username} to allowlist`);
-        
+
         // Update results if scan results are displayed
         if (this.scanResults && this.scanResults.length > 0) {
-          this.scanResults = this.scanResults.filter(user => 
-            user.username.toLowerCase() !== username.toLowerCase()
+          this.scanResults = this.scanResults.filter(
+            user => user.username.toLowerCase() !== username.toLowerCase()
           );
           this.displayResults(this.scanResults);
         }
@@ -609,12 +635,14 @@ class PopupManager {
       }
     } catch (error) {
       console.error('🔧 DEBUG: Exception in addToAllowlist:', error);
-      
+
       // Provide more specific error messages
       if (error.message.includes('Extension context invalidated')) {
         this.showError('Extension was reloaded. Please refresh the page and try again.');
       } else if (error.message.includes('Could not establish connection')) {
-        this.showError('Connection error. Please close and reopen the extension popup, or reload the extension.');
+        this.showError(
+          'Connection error. Please close and reopen the extension popup, or reload the extension.'
+        );
       } else if (error.message.includes('runtime not available')) {
         this.showError('Extension runtime error. Please reload the extension and try again.');
       } else {
@@ -631,17 +659,17 @@ class PopupManager {
   validateUsernameInput(input) {
     const username = input.value.trim().replace(/^@+/, '');
     const addButton = document.getElementById('add-user-btn');
-    
+
     // Remove existing validation classes
     input.classList.remove('input-valid', 'input-invalid');
-    
+
     if (!username) {
       // Empty input - neutral state
       addButton.disabled = false;
       input.style.borderColor = '';
       return;
     }
-    
+
     // Check format
     if (!/^[a-zA-Z0-9_]{1,15}$/.test(username)) {
       input.classList.add('input-invalid');
@@ -649,7 +677,7 @@ class PopupManager {
       addButton.disabled = true;
       return;
     }
-    
+
     // Check if already in allowlist
     if (this.allowlist.some(user => user.toLowerCase() === username.toLowerCase())) {
       input.classList.add('input-invalid');
@@ -657,7 +685,7 @@ class PopupManager {
       addButton.disabled = true;
       return;
     }
-    
+
     // Valid input
     input.classList.add('input-valid');
     input.style.borderColor = '#28a745';
@@ -666,7 +694,7 @@ class PopupManager {
 
   async removeFromAllowlist(username) {
     console.log('Removing from allowlist:', username);
-    
+
     if (!username) {
       this.showError('Username is required');
       return;
@@ -684,9 +712,9 @@ class PopupManager {
         type: 'REMOVE_FROM_ALLOWLIST',
         username: username
       });
-      
+
       console.log('Remove response:', response);
-      
+
       if (response && response.success) {
         this.allowlist = response.allowlist;
         this.updateAllowlistDisplay();
@@ -698,7 +726,7 @@ class PopupManager {
       }
     } catch (error) {
       console.error('Error removing from allowlist:', error);
-      
+
       if (error.message.includes('Extension context invalidated')) {
         this.showError('Extension was reloaded. Please refresh the page and try again.');
       } else if (error.message.includes('Could not establish connection')) {
@@ -717,10 +745,10 @@ class PopupManager {
 
   updateAllowlistDisplay() {
     document.getElementById('allowlist-count').textContent = this.allowlist.length;
-    
+
     const allowlistList = document.getElementById('allowlist-list');
     allowlistList.innerHTML = '';
-    
+
     if (this.allowlist.length === 0) {
       allowlistList.innerHTML = `
         <div style="padding: 40px; text-align: center; color: #6c757d;">
@@ -731,7 +759,7 @@ class PopupManager {
       `;
       return;
     }
-    
+
     this.allowlist.forEach(username => {
       const item = document.createElement('div');
       item.className = 'allowlist-item';
@@ -739,12 +767,12 @@ class PopupManager {
         <div class="allowlist-username">@${username}</div>
         <button class="remove-from-allowlist-btn" data-username="${username}">Remove</button>
       `;
-      
+
       const removeBtn = item.querySelector('.remove-from-allowlist-btn');
       removeBtn.addEventListener('click', () => {
         this.removeFromAllowlist(username);
       });
-      
+
       allowlistList.appendChild(item);
     });
   }
@@ -758,7 +786,7 @@ class PopupManager {
       this.showError('No allowlist to export');
       return;
     }
-    
+
     const exportData = {
       version: '1.0.0',
       exportDate: new Date().toISOString(),
@@ -766,15 +794,20 @@ class PopupManager {
       count: this.allowlist.length,
       allowlist: this.allowlist
     };
-    
-    this.downloadJSON(exportData, `x-unfollow-checker-allowlist-${new Date().toISOString().split('T')[0]}.json`);
+
+    this.downloadJSON(
+      exportData,
+      `x-unfollow-checker-allowlist-${new Date().toISOString().split('T')[0]}.json`
+    );
   }
 
   async clearAllowlist() {
-    if (!confirm('Are you sure you want to clear the entire allowlist? This action cannot be undone.')) {
+    if (
+      !confirm('Are you sure you want to clear the entire allowlist? This action cannot be undone.')
+    ) {
       return;
     }
-    
+
     try {
       // Clear allowlist by setting it to empty array
       const response = await chrome.runtime.sendMessage({
@@ -784,7 +817,7 @@ class PopupManager {
           data: { allowlist: [] }
         }
       });
-      
+
       if (response.success) {
         this.allowlist = [];
         this.updateAllowlistDisplay();
@@ -801,7 +834,7 @@ class PopupManager {
   updateHistoryDisplay() {
     const historyList = document.getElementById('history-list');
     historyList.innerHTML = '';
-    
+
     if (this.scanHistory.length === 0) {
       historyList.innerHTML = `
         <div style="padding: 40px; text-align: center; color: #6c757d;">
@@ -812,14 +845,14 @@ class PopupManager {
       `;
       return;
     }
-    
+
     this.scanHistory.forEach(scan => {
       const item = document.createElement('div');
       item.className = 'history-item';
-      
+
       const date = new Date(scan.date).toLocaleString();
       const duration = this.formatDuration(scan.duration);
-      
+
       item.innerHTML = `
         <div class="history-date">${date}</div>
         <div class="history-stats">
@@ -834,19 +867,21 @@ class PopupManager {
         </div>
         <div class="history-duration">Scan duration: ${duration}</div>
       `;
-      
+
       historyList.appendChild(item);
     });
   }
 
   async clearHistory() {
-    if (!confirm('Are you sure you want to clear the scan history? This action cannot be undone.')) {
+    if (
+      !confirm('Are you sure you want to clear the scan history? This action cannot be undone.')
+    ) {
       return;
     }
-    
+
     try {
       const response = await chrome.runtime.sendMessage({ type: 'CLEAR_SCAN_HISTORY' });
-      
+
       if (response.success) {
         this.scanHistory = [];
         this.updateHistoryDisplay();
@@ -862,21 +897,21 @@ class PopupManager {
   // Settings Management
   updateSettingsDisplay() {
     if (!this.settings) return;
-    
+
     const scrollDelay = document.getElementById('scroll-delay');
     const batchSize = document.getElementById('batch-size');
     const enableNotifications = document.getElementById('enable-notifications');
-    
+
     if (this.settings.scrollDelay) {
       scrollDelay.value = this.settings.scrollDelay;
       document.getElementById('scroll-delay-value').textContent = this.settings.scrollDelay + 'ms';
     }
-    
+
     if (this.settings.batchSize) {
       batchSize.value = this.settings.batchSize;
       document.getElementById('batch-size-value').textContent = this.settings.batchSize;
     }
-    
+
     if (this.settings.enableNotifications !== undefined) {
       enableNotifications.checked = this.settings.enableNotifications;
     }
@@ -888,13 +923,13 @@ class PopupManager {
       batchSize: parseInt(document.getElementById('batch-size').value),
       enableNotifications: document.getElementById('enable-notifications').checked
     };
-    
+
     try {
       const response = await chrome.runtime.sendMessage({
         type: 'UPDATE_SETTINGS',
         settings: settings
       });
-      
+
       if (response.success) {
         this.settings = response.settings;
         this.showSuccess('Settings saved successfully');
@@ -910,19 +945,19 @@ class PopupManager {
     if (!confirm('Reset all settings to default values?')) {
       return;
     }
-    
+
     const defaultSettings = {
       scrollDelay: 2000,
       batchSize: 50,
       enableNotifications: true
     };
-    
+
     try {
       const response = await chrome.runtime.sendMessage({
         type: 'UPDATE_SETTINGS',
         settings: defaultSettings
       });
-      
+
       if (response.success) {
         this.settings = response.settings;
         this.updateSettingsDisplay();
@@ -938,11 +973,11 @@ class PopupManager {
   // File handling
   async handleFileImport(file) {
     if (!file) return;
-    
+
     try {
       const text = await file.text();
       const data = JSON.parse(text);
-      
+
       if (data.type === 'allowlist' && data.allowlist) {
         // Import allowlist
         const response = await chrome.runtime.sendMessage({
@@ -952,7 +987,7 @@ class PopupManager {
             data: { allowlist: data.allowlist }
           }
         });
-        
+
         if (response.success) {
           this.allowlist = data.allowlist;
           this.updateAllowlistDisplay();
@@ -966,7 +1001,7 @@ class PopupManager {
     } catch (error) {
       this.showError('Failed to read file: ' + error.message);
     }
-    
+
     // Reset file input
     document.getElementById('file-input').value = '';
   }
@@ -988,7 +1023,7 @@ class PopupManager {
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    
+
     if (minutes > 0) {
       return `${minutes}m ${remainingSeconds}s`;
     } else {
@@ -1022,7 +1057,7 @@ class PopupManager {
       max-width: 300px;
       word-wrap: break-word;
     `;
-    
+
     if (type === 'success') {
       notification.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
     } else if (type === 'error') {
@@ -1030,15 +1065,15 @@ class PopupManager {
     } else {
       notification.style.background = 'linear-gradient(135deg, #1da1f2 0%, #1991db 100%)';
     }
-    
+
     notification.textContent = message;
     document.body.appendChild(notification);
-    
+
     // Animate in
     setTimeout(() => {
       notification.style.transform = 'translateX(0)';
     }, 100);
-    
+
     // Remove after 3 seconds
     setTimeout(() => {
       notification.style.transform = 'translateX(100%)';
@@ -1072,7 +1107,7 @@ class PopupManager {
         </p>
       </div>
     `;
-    
+
     // Create modal
     const modal = document.createElement('div');
     modal.style.cssText = `
@@ -1087,7 +1122,7 @@ class PopupManager {
       justify-content: center;
       z-index: 20000;
     `;
-    
+
     const modalContent = document.createElement('div');
     modalContent.style.cssText = `
       background: white;
@@ -1098,8 +1133,10 @@ class PopupManager {
       overflow-y: auto;
       position: relative;
     `;
-    
-    modalContent.innerHTML = aboutContent + `
+
+    modalContent.innerHTML =
+      aboutContent +
+      `
       <div style="text-align: center; padding: 0 20px 20px;">
         <button id="close-about" style="
           background: #1da1f2;
@@ -1112,16 +1149,16 @@ class PopupManager {
         ">Close</button>
       </div>
     `;
-    
+
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
-    
+
     // Close handlers
     document.getElementById('close-about').addEventListener('click', () => {
       document.body.removeChild(modal);
     });
-    
-    modal.addEventListener('click', (e) => {
+
+    modal.addEventListener('click', e => {
       if (e.target === modal) {
         document.body.removeChild(modal);
       }

@@ -28,7 +28,6 @@ class IconGenerator {
       console.log('   - PNG format with transparency');
       console.log('   - Proper branding elements');
       console.log('   - High-quality graphics\n');
-
     } catch (error) {
       console.error('❌ Icon generation failed:', error.message);
       process.exit(1);
@@ -100,11 +99,15 @@ class IconGenerator {
   </g>
   
   <!-- Size indicator text (only for larger icons) -->
-  ${size >= 32 ? `
+  ${
+    size >= 32
+      ? `
   <text x="${centerX}" y="${size - 4}" 
         font-family="Arial, sans-serif" font-size="${Math.max(6, fontSize / 2)}" 
         fill="#666" text-anchor="middle">${size}</text>
-  ` : ''}
+  `
+      : ''
+  }
 </svg>`;
   }
 
@@ -261,7 +264,6 @@ class SimplePNGGenerator {
         fs.writeFileSync(pngPath, buffer);
         console.log(`✅ Created icon${size}.png`);
       }
-
     } catch (error) {
       console.log('⚠️  Canvas not available. SVG icons created instead.');
       console.log('   Install canvas for PNG generation: npm install canvas');

@@ -1,6 +1,7 @@
 # Development Guide
 
-This guide will help you set up your development environment and contribute to X Unfollow Checker.
+This guide will help you set up your development environment and contribute to X
+Unfollow Checker.
 
 ## 🚀 Quick Start
 
@@ -17,6 +18,7 @@ This guide will help you set up your development environment and contribute to X
 ### Setup
 
 1. **Clone and Setup**
+
    ```bash
    git clone https://github.com/Edmon02/x-unfollow-checker.git
    cd x-unfollow-checker
@@ -24,13 +26,14 @@ This guide will help you set up your development environment and contribute to X
    ```
 
 2. **Load Extension in Browser**
+
    ```bash
    # Chrome/Edge
    # 1. Open chrome://extensions/
    # 2. Enable "Developer mode"
    # 3. Click "Load unpacked"
    # 4. Select this project folder
-   
+
    # Firefox
    # 1. Open about:debugging#/runtime/this-firefox
    # 2. Click "Load Temporary Add-on"
@@ -49,6 +52,7 @@ This guide will help you set up your development environment and contribute to X
 ### Daily Development
 
 1. **Start Development Server**
+
    ```bash
    npm run dev
    ```
@@ -59,6 +63,7 @@ This guide will help you set up your development environment and contribute to X
    - Check console for errors
 
 3. **Test Changes**
+
    ```bash
    npm test             # Run all tests
    npm run test:manual  # Open test interface
@@ -73,11 +78,13 @@ This guide will help you set up your development environment and contribute to X
 ### Git Workflow
 
 1. **Create Feature Branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 2. **Make Commits**
+
    ```bash
    git add .
    git commit -m "feat: add new feature"
@@ -99,9 +106,11 @@ This guide will help you set up your development environment and contribute to X
    - Test all features thoroughly
 
 2. **Test Interface**
+
    ```bash
    npm run test:manual
    ```
+
    Opens `tests/test-extension.html` for interactive testing
 
 3. **Console Debugging**
@@ -181,16 +190,16 @@ class UIComponent {
     this.container = container;
     this.init();
   }
-  
+
   init() {
     this.render();
     this.bindEvents();
   }
-  
+
   render() {
     // Create HTML structure
   }
-  
+
   bindEvents() {
     // Add event listeners
   }
@@ -218,19 +227,21 @@ class UIComponent {
 ### Common Debug Scenarios
 
 1. **Extension Not Loading**
+
    ```bash
    # Check manifest.json syntax
    npm run validate-manifest
-   
+
    # Check console errors
    # chrome://extensions/ → Details → Inspect views
    ```
 
 2. **Content Script Issues**
+
    ```javascript
    // Add debug logging
    console.log('🔧 DEBUG: Content script loaded');
-   
+
    // Check page detection
    if (!window.location.href.includes('x.com')) {
      console.warn('Not on X.com');
@@ -238,6 +249,7 @@ class UIComponent {
    ```
 
 3. **Message Passing Problems**
+
    ```javascript
    // Background script
    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -245,7 +257,7 @@ class UIComponent {
      // Always return true for async responses
      return true;
    });
-   
+
    // Popup script
    const response = await chrome.runtime.sendMessage({
      type: 'TEST_MESSAGE'
@@ -298,6 +310,7 @@ function sanitizeHTML(html) {
 ### Preparation
 
 1. **Version Bump**
+
    ```bash
    npm version patch  # 1.0.0 → 1.0.1
    npm version minor  # 1.0.0 → 1.1.0
@@ -305,6 +318,7 @@ function sanitizeHTML(html) {
    ```
 
 2. **Build for Production**
+
    ```bash
    npm run build:prod
    ```
@@ -347,7 +361,7 @@ git push origin v1.0.0
 
 ```javascript
 // Clean up event listeners
-component.destroy = function() {
+component.destroy = function () {
   element.removeEventListener('click', this.handleClick);
 };
 
@@ -366,11 +380,11 @@ const elementData = new WeakMap();
 
 ### Extension Context Invalidated
 
-**Problem**: Extension reloaded during development
-**Solution**: 
+**Problem**: Extension reloaded during development **Solution**:
+
 ```javascript
 try {
-  await chrome.runtime.sendMessage({type: 'PING'});
+  await chrome.runtime.sendMessage({ type: 'PING' });
 } catch (error) {
   console.log('Extension context invalidated, please reload');
 }
@@ -378,31 +392,35 @@ try {
 
 ### Content Script Not Injected
 
-**Problem**: Script doesn't run on X.com
-**Solution**: Check manifest.json matches patterns
+**Problem**: Script doesn't run on X.com **Solution**: Check manifest.json
+matches patterns
 
 ### Background Script Not Responding
 
-**Problem**: No response from background script
-**Solution**: Check service worker is active in chrome://extensions/
+**Problem**: No response from background script **Solution**: Check service
+worker is active in chrome://extensions/
 
 ## 📚 Learning Resources
 
 ### Chrome Extension Development
+
 - [Chrome Extension Documentation](https://developer.chrome.com/docs/extensions/)
 - [Manifest V3 Migration Guide](https://developer.chrome.com/docs/extensions/mv3/intro/)
 - [Chrome Extension Samples](https://github.com/GoogleChrome/chrome-extensions-samples)
 
 ### Web Technologies
+
 - [MDN Web Docs](https://developer.mozilla.org/)
 - [CSS Tricks](https://css-tricks.com/)
 - [JavaScript.info](https://javascript.info/)
 
 ### Tools and Libraries
+
 - [ESLint Rules](https://eslint.org/docs/rules/)
 - [Prettier Configuration](https://prettier.io/docs/en/configuration.html)
 - [Git Best Practices](https://git-scm.com/doc)
 
 ---
 
-Happy coding! 🚀 If you have questions, check the [Contributing Guide](../CONTRIBUTING.md) or open an issue.
+Happy coding! 🚀 If you have questions, check the
+[Contributing Guide](../CONTRIBUTING.md) or open an issue.
