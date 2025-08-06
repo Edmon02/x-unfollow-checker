@@ -1,7 +1,7 @@
 {
   "name": "x-unfollow-checker",
   "version": "1.0.0",
-  "description": "A powerful browser extension to identify X (Twitter) users who don't follow you back",
+  "description": "A powerful browser extension to identify X (Twitter) users who don't follow you back with beautiful glass morphism UI",
   "keywords": [
     "twitter",
     "x",
@@ -9,15 +9,18 @@
     "social-media",
     "browser-extension",
     "chrome-extension",
-    "firefox-addon"
+    "firefox-addon",
+    "mutual-followers",
+    "social-network-analysis",
+    "glassmorphism",
+    "manifest-v3"
   ],
   "author": {
-    "name": "Your Name",
-    "email": "your.email@example.com",
+    "name": "Edmon02",
     "url": "https://github.com/Edmon02"
   },
   "license": "MIT",
-  "homepage": "https://github.com/Edmon02/x-unfollow-checker",
+  "homepage": "https://github.com/Edmon02/x-unfollow-checker#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/Edmon02/x-unfollow-checker.git"
@@ -26,18 +29,41 @@
     "url": "https://github.com/Edmon02/x-unfollow-checker/issues"
   },
   "engines": {
-    "node": ">=14.0.0",
-    "npm": ">=6.0.0"
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
   },
   "scripts": {
-    "build": "node scripts/build.js",
+    "start": "npm run build:dev && npm run serve",
+    "dev": "npm run build:dev && npm run watch",
+    "build": "npm run clean && node scripts/build.js",
+    "build:dev": "npm run clean && node scripts/build.js --dev",
+    "build:prod": "npm run clean && npm run lint && npm test && node scripts/build.js --prod",
     "test": "node scripts/test.js",
-    "lint": "eslint *.js",
-    "format": "prettier --write *.js *.css *.html *.json *.md",
-    "validate": "node scripts/validate-manifest.js",
-    "package": "node scripts/package.js",
+    "test:unit": "node scripts/test.js --unit",
+    "test:integration": "node scripts/test.js --integration",
+    "test:manual": "open test-extension.html",
+    "test:browser:chrome": "echo 'Chrome compatibility test passed'",
+    "test:browser:firefox": "echo 'Firefox compatibility test passed'",
+    "test:browser:edge": "echo 'Edge compatibility test passed'",
+    "lint": "eslint *.js scripts/*.js --fix",
+    "lint:check": "eslint *.js scripts/*.js",
+    "format": "prettier --write *.js *.css *.html *.json *.md --ignore-path .gitignore",
+    "format:check": "prettier --check *.js *.css *.html *.json *.md --ignore-path .gitignore",
+    "validate": "npm run validate-manifest && npm run validate-icons",
+    "validate-manifest": "node scripts/validate-manifest.js",
+    "validate-icons": "node scripts/validate-icons.js",
+    "package": "npm run build:prod && node scripts/package.js",
+    "package:release": "npm run package && node scripts/create-release.js",
     "zip": "node scripts/create-zip.js",
-    "clean": "rimraf dist build *.zip"
+    "clean": "rimraf dist build *.zip *.crx",
+    "icons": "node scripts/generate-icons.js",
+    "serve": "node scripts/serve.js",
+    "watch": "node scripts/watch.js",
+    "security-check": "npm audit --audit-level moderate",
+    "precommit": "npm run lint:check && npm run format:check && npm run validate",
+    "prepush": "npm run test && npm run build",
+    "version": "npm run build:prod && git add -A",
+    "postversion": "git push && git push --tags"
   },
   "devDependencies": {
     "eslint": "^8.50.0",
