@@ -337,14 +337,17 @@ class PopupManager {
   handleScanStatusUpdate(status) {
     if (status.isComplete) {
       this.isScanning = false;
-      this.scanResults = status.results.nonMutualFollowers;
+      // Raw results from scan
+      const rawResults = status.results.nonMutualFollowers || [];
+      // Apply allowlist filtering
+      this.scanResults = this.filterResultsWithAllowlist(rawResults);
       this.updateScanUI(false);
       this.updateStatusCard(
         '✅',
         'Scan completed!',
-        `Found ${status.results.nonMutualFollowers.length} non-mutual followers out of ${status.results.totalFollowing} total following.`
+        `Found ${this.scanResults.length} non-mutual followers (excluded ${this.allowlist.length} allowlisted) out of ${status.results.totalFollowing} total following.`
       );
-      this.displayResults(status.results.nonMutualFollowers);
+      this.displayResults(this.scanResults);
 
       // Switch to scanner tab if not already there
       if (this.currentTab !== 'scanner') {
@@ -353,6 +356,36 @@ class PopupManager {
     } else {
       // Update progress
       this.updateStatusCard('🔄', 'Scanning...', status.message);
+    }
+  }
+
+  // Filter an array of user result objects against current allowlist (case-insensitive)
+  filterResultsWithAllowlist(results) {
+    if (!Array.isArray(results) || results.length === 0) {
+      return [];
+    }
+    if (!Array.isArray(this.allowlist) || this.allowlist.length === 0) {
+      return results;
+    }
+    const allowSet = new Set(this.allowlist.map(u => u.toLowerCase()));
+    return results.filter(u => !allowSet.has((u.username || '').toLowerCase()));
+  }
+
+  // Re-filter current results after allowlist changes
+  refilterCurrentResults() {
+    if (!this.scanResults || this.scanResults.length === 0) {
+      return;
+    }
+    const before = this.scanResults.length;
+    this.scanResults = this.filterResultsWithAllowlist(this.scanResults);
+    const after = this.scanResults.length;
+    if (after !== before) {
+      /* eslint-disable-next-line no-console */
+      console.log(`🔧 DEBUG: Refiltered scan results after allowlist change. Removed ${before - after} entries.`);
+      this.displayResults(this.scanResults);
+      // Clear selections because indices may have shifted
+      this.selectedUsers.clear();
+      this.updateSelectAllButton();
     }
   }
 
@@ -511,11 +544,11 @@ class PopupManager {
       this.showError('No results to export');
       return;
     }
-
-    const selectedResults =
-      this.selectedUsers.size > 0
-        ? this.scanResults.filter((_, index) => this.selectedUsers.has(index))
-        : this.scanResults;
+    // Defensive: ensure allowlist filtering applied
+    const filtered = this.filterResultsWithAllowlist(this.scanResults);
+    const selectedResults = this.selectedUsers.size > 0
+      ? filtered.filter((_, index) => this.selectedUsers.has(index))
+      : filtered;
 
     const exportData = {
       exportDate: new Date().toISOString(),
@@ -775,6 +808,9 @@ class PopupManager {
 
       allowlistList.appendChild(item);
     });
+
+    // Re-filter any existing scan results after allowlist change
+    this.refilterCurrentResults();
   }
 
   importAllowlist() {
